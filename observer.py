@@ -6,7 +6,7 @@ import logging
 import sys
 import os
 
-def calculate_expected_viewers_for_channel(streams):
+def calc_stats(streams):
 	viewers = []
 	usual_viewers = []
 	for stream in streams:
@@ -17,7 +17,12 @@ def calculate_expected_viewers_for_channel(streams):
 	for v in viewers:
 		if v < mean + pstdev and v > mean - pstdev:
 			usual_viewers.append(v)
-	return statistics.mean(usual_viewers)
+	stats = {
+		'mean'           : mean,
+		'pstdev'         : pstdev,
+		'expected_viewers': statistics.mean(usual_viewers)
+	}
+	return stats
 
 os.makedirs('logs', exist_ok=True)
 
@@ -39,8 +44,8 @@ try:
 	conn = sqlite3.connect('twitch.db')
 	c = conn.cursor()
 	c.execute('CREATE TABLE IF NOT EXISTS games(\
-		name text, viewers integer, channels integer, expectedviewersforchannel integer,\
-		curtime datetime, PRIMARY KEY(name, curtime))')
+		name text, viewers integer, channels integer, expected_viewers integer,\
+		mean integer, pstdev integer, curtime datetime, PRIMARY KEY(name, curtime))')
 
 	for game in games:
 		logging.info(game.name)
@@ -52,9 +57,10 @@ try:
 			ofs += len(streams)
 			logging.info(ofs)
 			streams = client.streams(game=game.name, limit=100, offset=ofs)
-		expectedviewersforchannel = calculate_expected_viewers_for_channel(total_streams)
-		c.execute('INSERT INTO games VALUES (?,?,?,?,?)',\
-			(game.name, game.viewers, game.channels, int(expectedviewersforchannel), curtime))
+		stats = calc_stats(total_streams)
+		c.execute('INSERT INTO games VALUES (?,?,?,?,?,?,?)',\
+			(game.name, game.viewers, game.channels, int(stats['expected_viewers']),\
+				int(stats['mean']), int(stats['pstdev']), curtime))
 	conn.commit()
 	conn.close()
 except Exception as e:
