@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 from twitch import Twitch
 import sqlite3
 from datetime import datetime

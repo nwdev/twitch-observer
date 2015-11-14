@@ -47,8 +47,8 @@ class Twitch:
 	def http_get(self, url):
 		res = requests.get(url, headers=self.header)
 		if res.status_code >= 400:
-			logging.error("ERROR: url returned bad status code! Exiting...\nurl: " + 
-				url + ", status_code: " + str(res.status_code))
+			logging.error("%s returned bad status code(%d)! Exiting..." %\
+			(url, res.status_code))
 			exit()
 		return res
 
