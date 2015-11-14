@@ -16,7 +16,7 @@ def calc_stats(streams):
 	pstdev = statistics.pstdev(viewers)
 	logging.info("%d %d" % (mean, pstdev))
 	for v in viewers:
-		if v < mean + pstdev and v > mean - pstdev:
+		if v <= mean + pstdev and v > mean - pstdev - 1: #azert, ha csak 1 channel van es a pstdev ekkor 0
 			usual_viewers.append(v)
 	stats = {
 		'mean'           : mean,
