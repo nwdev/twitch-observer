@@ -12,6 +12,9 @@ def calc_stats(streams):
 	usual_viewers = []
 	for stream in streams:
 		viewers.append(stream.viewers)
+	if len(viewers) == 0:
+		logging.warning("Viewers is zero!")
+		return {'mean': 0, 'pstdev': 0, 'expected_viewers': 0}
 	mean = statistics.mean(viewers)
 	pstdev = statistics.pstdev(viewers)
 	logging.info("%d %d" % (mean, pstdev))
