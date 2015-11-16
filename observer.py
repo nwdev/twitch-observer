@@ -34,9 +34,8 @@ curtime = datetime.now()
 curtime_date = str("%s-%s-%s %s:%s" % (\
 	str(curtime.year), str(curtime.month).zfill(2), str(curtime.day).zfill(2),\
 	str(curtime.hour).zfill(2), str(curtime.minute).zfill(2)))
-curtime_i = str("%s%s%s%s%s" % (\
-	str(curtime.year), str(curtime.month).zfill(2), str(curtime.day).zfill(2),\
-	str(curtime.hour).zfill(2), str(curtime.minute).zfill(2)))
+
+day_min = curtime.hour * 60 + curtime.minute
 
 logging.basicConfig(filename='logs/%s.log' % (curtime), level=logging.INFO)
 console = logging.StreamHandler()
@@ -52,8 +51,8 @@ try:
 	c = conn.cursor()
 	c.execute('CREATE TABLE IF NOT EXISTS games(\
 		name text, viewers integer, channels integer, expected_viewers integer,\
-		mean integer, pstdev integer, curtime_date datetime, curtime_i integer,\
-		PRIMARY KEY(name, curtime_i))')
+		mean integer, pstdev integer, curtime_date datetime, day_min integer,\
+		PRIMARY KEY(name, curtime_date))')
 
 	for game in games:
 		logging.info(game.name)
@@ -68,7 +67,7 @@ try:
 		stats = calc_stats(total_streams)
 		c.execute('INSERT INTO games VALUES (?,?,?,?,?,?,?,?)',\
 			(game.name, game.viewers, game.channels, int(stats['expected_viewers']),\
-				int(stats['mean']), int(stats['pstdev']), curtime_date, curtime_i))
+				int(stats['mean']), int(stats['pstdev']), curtime_date, day_min))
 	conn.commit()
 	conn.close()
 except Exception as e:
