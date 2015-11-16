@@ -31,7 +31,10 @@ def calc_stats(streams):
 os.makedirs('logs', exist_ok=True)
 
 curtime = datetime.now()
-curtime = str("%s-%s-%s %s:%s" % (\
+curtime_date = str("%s-%s-%s %s:%s" % (\
+	str(curtime.year), str(curtime.month).zfill(2), str(curtime.day).zfill(2),\
+	str(curtime.hour).zfill(2), str(curtime.minute).zfill(2)))
+curtime_i = str("%s%s%s%s%s" % (\
 	str(curtime.year), str(curtime.month).zfill(2), str(curtime.day).zfill(2),\
 	str(curtime.hour).zfill(2), str(curtime.minute).zfill(2)))
 
@@ -49,7 +52,8 @@ try:
 	c = conn.cursor()
 	c.execute('CREATE TABLE IF NOT EXISTS games(\
 		name text, viewers integer, channels integer, expected_viewers integer,\
-		mean integer, pstdev integer, curtime datetime, PRIMARY KEY(name, curtime))')
+		mean integer, pstdev integer, curtime_date datetime, curtime_i integer,\
+		PRIMARY KEY(name, curtime_i))')
 
 	for game in games:
 		logging.info(game.name)
@@ -62,9 +66,9 @@ try:
 			logging.info(ofs)
 			streams = client.streams(game=game.name, limit=100, offset=ofs)
 		stats = calc_stats(total_streams)
-		c.execute('INSERT INTO games VALUES (?,?,?,?,?,?,?)',\
+		c.execute('INSERT INTO games VALUES (?,?,?,?,?,?,?,?)',\
 			(game.name, game.viewers, game.channels, int(stats['expected_viewers']),\
-				int(stats['mean']), int(stats['pstdev']), curtime))
+				int(stats['mean']), int(stats['pstdev']), curtime_date, curtime_i))
 	conn.commit()
 	conn.close()
 except Exception as e:
