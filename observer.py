@@ -37,7 +37,7 @@ curtime_date = str("%s-%s-%s %s:%s" % (\
 
 day_min = curtime.hour * 60 + curtime.minute
 
-logging.basicConfig(filename='logs/%s.log' % (curtime), level=logging.INFO)
+logging.basicConfig(filename='logs/%s.log' % (curtime_date), level=logging.INFO)
 console = logging.StreamHandler()
 console.setLevel(logging.INFO)
 logging.getLogger('').addHandler(console)
